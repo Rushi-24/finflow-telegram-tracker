@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,8 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
-import { getTelegramToken, saveTelegramToken, getTelegramTransactions, linkTelegramChatId } from '@/lib/firestore';
-import { Copy, Check, AlertCircle, Bot, Zap, MessageSquare } from 'lucide-react';
+import { getTelegramToken, saveTelegramToken } from '@/lib/firestore';
+import { Copy, Check, AlertCircle, Bot, Zap } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 const TelegramBot = () => {
@@ -15,11 +16,9 @@ const TelegramBot = () => {
   const { toast } = useToast();
   const [token, setToken] = useState('');
   const [existingToken, setExistingToken] = useState('');
-  const [chatId, setChatId] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [transactions, setTransactions] = useState([]);
   
   const botUsername = "FinFlowBot";
   const userId = user?.uid || '';
@@ -81,47 +80,6 @@ const TelegramBot = () => {
       toast({
         title: "Error",
         description: "Failed to save your Telegram token",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveChatId = async () => {
-    if (!chatId.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid chat ID",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to save your chat ID",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    try {
-      setSaving(true);
-      await linkTelegramChatId(user.uid, chatId);
-      toast({
-        title: "Success",
-        description: "Your Telegram chat ID has been linked successfully",
-      });
-      
-      const telegramTransactions = await getTelegramTransactions(chatId);
-      setTransactions(telegramTransactions);
-    } catch (error) {
-      console.error('Error linking chat ID:', error);
-      toast({
-        title: "Error",
-        description: "Failed to link your Telegram chat ID",
         variant: "destructive",
       });
     } finally {
@@ -239,23 +197,6 @@ const TelegramBot = () => {
                     You'll receive this token when you connect to the bot
                   </p>
                 </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Telegram Chat ID</label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter your Telegram chat ID"
-                      value={chatId}
-                      onChange={(e) => setChatId(e.target.value)}
-                    />
-                    <Button onClick={handleSaveChatId} disabled={saving}>
-                      {saving ? "Linking..." : "Link"}
-                    </Button>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    You can get your chat ID by sending /start to the bot
-                  </p>
-                </div>
               </CardContent>
               <CardFooter className="flex flex-col items-start gap-4">
                 <div className="w-full">
@@ -288,44 +229,6 @@ const TelegramBot = () => {
                   </p>
                 </div>
               </CardFooter>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-6 w-6" />
-                  Simplified Format
-                </CardTitle>
-                <CardDescription>
-                  Quickly add transactions with a simple message format
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="bg-muted rounded-lg p-4">
-                    <h3 className="font-medium mb-2">New Simple Format:</h3>
-                    <div className="bg-muted-foreground/10 rounded-lg p-3 font-mono text-sm">
-                      <p>Category Amount</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Examples:
-                    </p>
-                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                      <li>Food 200</li>
-                      <li>Transport 50.5</li>
-                      <li>Entertainment 75</li>
-                    </ul>
-                  </div>
-                  
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Simple is better</AlertTitle>
-                    <AlertDescription>
-                      This format automatically creates expense transactions with the current timestamp
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              </CardContent>
             </Card>
             
             <Card>
@@ -387,32 +290,6 @@ const TelegramBot = () => {
                 </div>
               </CardContent>
             </Card>
-            
-            {transactions.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Telegram Transactions</CardTitle>
-                  <CardDescription>
-                    Transactions added via Telegram
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {transactions.map((transaction, index) => (
-                      <div key={index} className="flex justify-between border-b pb-2">
-                        <div>
-                          <p className="font-medium">{transaction.category}</p>
-                          <p className="text-sm text-muted-foreground">{transaction.description}</p>
-                        </div>
-                        <p className={transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}>
-                          {transaction.type === 'income' ? '+' : '-'}${transaction.amount}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
         )}
       </div>
