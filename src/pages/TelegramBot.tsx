@@ -1,5 +1,5 @@
 
-import DashboardLayout from '@/components/layout/DashboardLayout';
+import React from 'react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/components/ui/use-toast';
 import { getTelegramToken, saveTelegramToken } from '@/lib/firestore';
 import { Copy, Check, AlertCircle, Bot, Zap } from 'lucide-react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 const TelegramBot = () => {
   const { user } = useAuth();
@@ -138,7 +139,7 @@ const TelegramBot = () => {
                     How it works
                   </h3>
                   <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
-                    <li>Connect to our Telegram bot {@botUsername}</li>
+                    <li>Connect to our Telegram bot {botUsername}</li>
                     <li>Use simple commands to add transactions</li>
                     <li>Your data syncs automatically with your FinFlow account</li>
                   </ol>
